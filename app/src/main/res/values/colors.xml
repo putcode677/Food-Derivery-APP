@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Neumorphism Background -->
+    <color name="neo_background">#E8EEF5</color>
+
+    <!-- Main Brand -->
+    <color name="primary">#FF6B35</color>
+    <color name="primary_dark">#E85A2A</color>
+
+    <!-- Text -->
+    <color name="text_primary">#263238</color>
+    <color name="text_secondary">#78909C</color>
+
+    <!-- White surface -->
+    <color name="surface">#E8EEF5</color>
+
+    <!-- Status -->
+    <color name="success">#43A047</color>
+    <color name="error">#E53935</color>
+
+</resources>
