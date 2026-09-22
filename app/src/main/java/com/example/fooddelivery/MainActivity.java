@@ -144,9 +144,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToHome() {
-        // TODO: Replace with your real home/dashboard Activity once it exists
-        Toast.makeText(MainActivity.this,
-                "Logged in! (Home screen not built yet)",
-                Toast.LENGTH_SHORT).show();
+
+        String currentUid = mAuth.getCurrentUser().getUid();
+
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(currentUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+
+                    String role = doc.getString("role");
+
+                    if ("Restaurant".equals(role)) {
+                        startActivity(new Intent(MainActivity.this, RestaurantMainActivity.class));
+                        finish();
+                    } else {
+                        Toast.makeText(MainActivity.this,
+                                "Logged in as " + role + " (dashboard not built yet)",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(MainActivity.this,
+                                "Could not load user role: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
     }
 }
