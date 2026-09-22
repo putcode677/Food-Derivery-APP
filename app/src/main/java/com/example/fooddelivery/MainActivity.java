@@ -11,6 +11,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText etEmail;
@@ -20,11 +23,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvRegister;
     private TextView tvForgotPassword;
 
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        // Firebase
+        mAuth = FirebaseAuth.getInstance();
 
         // Find views
         etEmail = findViewById(R.id.etEmail);
@@ -45,12 +53,19 @@ public class MainActivity extends AppCompatActivity {
 
         // FORGOT PASSWORD
         tvForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(
-                    MainActivity.this,
-                    "Password reset coming soon",
-                    Toast.LENGTH_SHORT
-            ).show();
+            resetPassword();
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // If already logged in, skip login screen
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            goToHome();
+        }
     }
 
     private void login() {
@@ -84,11 +99,54 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Temporary login
-        Toast.makeText(
-                MainActivity.this,
-                "Login validation successful",
-                Toast.LENGTH_SHORT
-        ).show();
+        btnLogin.setEnabled(false);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    btnLogin.setEnabled(true);
+
+                    Toast.makeText(MainActivity.this,
+                            "Login successful",
+                            Toast.LENGTH_SHORT).show();
+
+                    goToHome();
+                })
+                .addOnFailureListener(e -> {
+                    btnLogin.setEnabled(true);
+
+                    Toast.makeText(MainActivity.this,
+                            "Login failed: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void resetPassword() {
+
+        String email = etEmail.getText().toString().trim();
+
+        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter your email first, then tap 'Forgot password?'");
+            etEmail.requestFocus();
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(email)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(MainActivity.this,
+                            "Password reset link sent to " + email,
+                            Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(MainActivity.this,
+                            "Could not send reset link: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void goToHome() {
+        // TODO: Replace with your real home/dashboard Activity once it exists
+        Toast.makeText(MainActivity.this,
+                "Logged in! (Home screen not built yet)",
+                Toast.LENGTH_SHORT).show();
     }
 }
